@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.domain.mapper.MeetingRoomMapper"> <!-- (1) -->
+
+    <resultMap id="roomResultMap" type="MeetingRoom">
+        <id column="room_id" property="roomId"/>
+        <result column="room_name" property="roomName"/>
+    </resultMap>
+
+    <!-- (1) -->
+    <select id="findOne" parameterType="string" resultMap="roomResultMap">
+        SELECT
+        room_id,
+        room_name,
+        capacity
+        FROM
+        meeting_room
+        WHERE
+        room_id = #{roomId}
+    </select>
+
+    <select id="count" resultType="_long">
+        SELECT COUNT(*) FROM meeting_room
+    </select>
+
+    <select id="findAll" resultType="MeetingRoom">
+        SELECT
+        room_id AS roomId,
+        room_name AS roomName,
+        capacity
+        FROM
+        meeting_room
+        ORDER BY
+        room_id
+    </select>
+
+    <select id="findAllOrderByColumn" resultType="MeetingRoom">
+        SELECT
+        room_id AS roomId,
+        room_name AS roomName,
+        capacity
+        FROM
+        meeting_room
+        ORDER BY
+        ${value}
+    </select>
+
+    <select id="findAllOrderBy" resultType="MeetingRoom">
+        SELECT
+        room_id AS roomId,
+        room_name AS roomName,
+        capacity
+        FROM
+        meeting_room
+        ORDER BY
+        ${column} ${direction}
+    </select>
+
+    <select id="findAllByCriteria" resultType="MeetingRoom">
+        SELECT
+        room_id, room_name, capacity
+        FROM
+        meeting_room
+        <where> <!-- (1) -->
+            <if test="criteria != null">
+                <if test="criteria.roomId != null"> <!-- (2) -->
+                    AND room_id like '%' || #{criteria.roomId} || '%'
+                </if>
+                <if test="criteria.roomName != null">
+                    AND room_name like '%' || #{criteria.roomName} || '%'
+                </if>
+                <if test="criteria.capacity != null">
+                    AND
+                    <![CDATA[
+                capacity >= #{criteria.capacity}
+            ]]>
+                </if>
+            </if>
+        </where>
+        ORDER BY ${orderByColumn}
+    </select>
+
+    <select id="findByCapacityClass" parameterType="string" resultType="MeetingRoom">
+        SELECT
+        room_id, room_name, capacity
+        FROM
+        meeting_room
+        <where>
+            <choose> <!-- (1) -->
+                <when test="capacityClass == 'small'"> <!-- (2) -->
+                    <![CDATA[
+                    capacity  <  50
+                ]]>
+                </when>
+                <when test="capacityClass == 'middle'"> <!-- (2) -->
+                    <![CDATA[
+                    capacity  >=  50 AND capacity < 100
+                ]]>
+                </when>
+                <otherwise> <!-- (3) -->
+                    <![CDATA[
+                    capacity  >= 100
+                ]]>
+                </otherwise>
+            </choose>
+        </where>
+        ORDER BY
+        room_id
+    </select>
+
+    <select id="findByRoomIds" parameterType="list" resultType="MeetingRoom">
+        SELECT
+        room_id, room_name, capacity
+        FROM
+        meeting_room
+        <where>
+            <if test="list != null"> <!-- (1) -->
+                <foreach item="id" index="index" collection="list"
+                         open="room_id IN (" separator="," close=")"> <!-- (2) -->
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY
+        room_id
+    </select>
+
+
+    <insert id="create" parameterType="MeetingRoom">
+        INSERT INTO meeting_room (room_id, room_name, capacity)
+        VALUES (#{roomId}, #{roomName}, #{capacity})
+    </insert>
+
+    <insert id="createWithSelectKey" parameterType="MeetingRoom">
+        <!-- (1) -->
+        <selectKey keyProperty="roomId" order="BEFORE" resultType="string">
+            SELECT RANDOM_UUID()
+        </selectKey>
+
+        INSERT INTO meeting_room (room_id, room_name, capacity)
+        VALUES (#{roomId}, #{roomName}, #{capacity})
+    </insert>
+
+    <insert id="createWithIdColumn" parameterType="Room" useGeneratedKeys="true" keyProperty="roomId"> <!-- (1) -->
+        INSERT INTO room (room_name, capacity)
+        VALUES (#{roomName}, #{capacity})
+    </insert>
+
+    <insert id="createWithParams">
+        INSERT INTO meeting_room (room_id, room_name, capacity)
+        VALUES (#{roomId}, #{roomName}, #{capacity})
+    </insert>
+
+    <!-- (1) -->
+    <update id="update" parameterType="MeetingRoom">
+        UPDATE meeting_room SET
+        room_name = #{roomName},
+        capacity = #{capacity}
+        WHERE
+        room_id = #{roomId}
+    </update>
+
+    <!-- (1) -->
+    <update id="updateWithConditional" parameterType="MeetingRoom">
+        UPDATE
+        meeting_room
+        <set> <!-- (1) -->
+            room_name = #{roomName},
+            <if test="capacity > 0"> <!-- (2) -->
+                capacity = #{capacity}
+            </if>
+        </set>
+        WHERE
+        room_id = #{roomId}
+    </update>
+
+    <!-- (1) -->
+    <delete id="delete" parameterType="string">
+        DELETE FROM meeting_room
+        WHERE
+        room_id = #{roomId}
+    </delete>
+
+</mapper>
