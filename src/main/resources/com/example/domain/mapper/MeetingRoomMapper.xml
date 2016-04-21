@@ -182,4 +182,15 @@
         room_id = #{roomId}
     </delete>
 
+    <select id="collectAll" resultType="MeetingRoom">
+        SELECT
+            room_id,
+            room_name,
+            capacity
+        FROM
+            meeting_room
+        ORDER BY
+            room_id
+    </select>
+
 </mapper>

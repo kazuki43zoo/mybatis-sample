@@ -5,6 +5,7 @@ import com.example.domain.model.MeetingRoom;
 import com.example.domain.model.MeetingRoomCriteria;
 import com.example.domain.model.OrderBy;
 import com.example.domain.model.Room;
+import org.apache.ibatis.session.RowBounds;
 import org.hamcrest.core.Is;
 import org.junit.Assert;
 import org.junit.Test;
@@ -322,6 +323,21 @@ public class MybatisSampleApplicationTests {
         List<MeetingRoom> meetingRooms = meetingRoomMapper.findByRoomIds(Arrays.asList("R001", "R002", "R003"));
         Assert.assertThat(meetingRooms.size(), Is.is(3));
 
+    }
+
+    @Test
+    public void collectAll() {
+        meetingRoomMapper.collectAll(context -> {
+            int position = context.getResultCount();
+            MeetingRoom meetingRoom = context.getResultObject();
+            // ...
+        });
+    }
+
+    @Test
+    public void findAllWithRawBounds() {
+        List<MeetingRoom> meetingRooms = meetingRoomMapper.findAll(new RowBounds(0,1));
+        System.out.println(meetingRooms.get(0).getRoomName());
     }
 
 }

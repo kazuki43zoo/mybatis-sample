@@ -1,11 +1,10 @@
 package com.example.domain.mapper;
 
 
-import com.example.domain.model.MeetingRoom;
-import com.example.domain.model.MeetingRoomCriteria;
-import com.example.domain.model.OrderBy;
-import com.example.domain.model.Room;
+import com.example.domain.model.*;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.session.ResultHandler;
+import org.apache.ibatis.session.RowBounds;
 
 import java.util.List;
 
@@ -46,7 +45,7 @@ public interface MeetingRoomMapper {
 
 
     boolean delete(String roomId); // (1)
-
-
+    List<MeetingRoom> findAll(RowBounds rowBounds);
+    void collectAll(ResultHandler<MeetingRoom> resultHandler); // (1)
 
 }
